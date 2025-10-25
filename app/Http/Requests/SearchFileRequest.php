@@ -2,38 +2,33 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\JsonResponseHelper;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CreateFolderRequest extends FormRequest
+class SearchFileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'parent_id' => 'sometimes|exists:folders,id|nullable',
-            'name' => 'required',
+            'created_at' => 'sometimes|date',
+            'updated_at' => 'sometimes|date',
+            'extension' => 'sometimes',
+            'file_name' => 'sometimes',
+            'folder_id' => 'sometimes|exists:folders,id',
+            'small_size' => 'sometimes',
+            'big_size' => 'sometimes',
         ];
     }
 
     protected function failedValidation(Validator $validator)
     {
         $errors = collect($validator->errors()->toArray())
-            ->map(fn($error) => $error[0]) 
+            ->map(fn($error) => $error[0])
             ->toArray();
 
         throw new HttpResponseException(

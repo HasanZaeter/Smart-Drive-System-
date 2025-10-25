@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponseHelper;
 use App\Http\Requests\CreateFolderRequest;
+use App\Http\Requests\SearchFolderRequest;
+use App\Http\Requests\SearchRequest;
 use App\Http\Requests\UpdateFolderRequest;
+use App\Http\Resources\FolderResource;
 use App\Models\Folder;
 use App\Repositories\PermissionRepository;
 use App\Services\FolderService;
@@ -92,5 +95,14 @@ class FolderController extends Controller
             return $response;
             // return JsonResponseHelper::successResponse('downloaded folder successfully', [], 200);
         }
+    }
+
+    public function search(SearchFolderRequest $request)
+    {
+        $validated = $request->validated();
+
+        $data = $this->folderService->search($validated);
+
+        return JsonResponseHelper::successResponse('retreive all folders', FolderResource::collection($data), 200);
     }
 }

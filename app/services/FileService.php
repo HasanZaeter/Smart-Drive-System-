@@ -6,7 +6,9 @@ use App\Models\File;
 use App\Repositories\FileRepository;
 use App\Repositories\FolderRepository;
 use App\Repositories\PermissionRepository;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -97,5 +99,56 @@ class FileService
 
         $this->folderRepo->decrementSizeForFolders($file->size, $file->folder);
         $this->fileRepo->delete($file);
+    }
+
+    public function search(array $data)
+    {
+        $authUserId = Auth::user()->id;
+
+        $query = File::query()
+            ->leftJoin('folders', 'folders.id', '=', 'files.folder_id')
+            ->where(function ($query) use ($authUserId) {
+                $query->where('folders.user_id', $authUserId)
+                    ->orWhereExists(function ($subQuery) use ($authUserId) {
+                        $subQuery->select(DB::raw(1))
+                            ->from('user_permissions')
+                            ->whereColumn('user_permissions.folder_id', 'folders.id')
+                            ->where('user_permissions.user_id', $authUserId)
+                            ->where('user_permissions.permission_id', 1);
+                    });
+            });
+
+        $filters = [
+
+            'extension' => fn($query, $value) =>
+            $query->where('files.name', 'like', "%.{$value}"),
+
+            'file_name' => fn($query, $value) =>
+            $query->where('files.name', 'like', "%{$value}%"),
+
+            'small_size' => fn($query, $value) =>
+            $query->where('files.size', '>=', $value),
+
+            'big_size' => fn($query, $value) =>
+            $query->where('files.size', '<=', $value),
+
+            'created_at' => fn($query, $value) =>
+            $query->whereBetween('files.created_at', [
+                $value,
+                Carbon::now()
+            ]),
+
+            'updated_at' => fn($query, $value) =>
+            $query->whereDate('files.updated_at', $value),
+        ];
+
+        foreach ($filters as $key => $callback) {
+            if (!empty($data[$key])) {
+                $callback($query, $data[$key]);
+            }
+        }
+
+        $result = $query->select('files.*')->get();
+        return $result;
     }
 }

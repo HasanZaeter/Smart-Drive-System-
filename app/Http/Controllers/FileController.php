@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponseHelper;
 use App\Http\Requests\CreateFileRequest;
+use App\Http\Requests\SearchFileRequest;
 use App\Http\Requests\UpdateFileRequest;
+use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Repositories\PermissionRepository;
 use App\Services\FileService;
@@ -72,5 +74,12 @@ class FileController extends Controller
             return JsonResponseHelper::successResponse('delete file successfully', [], 200);
         }
         return JsonResponseHelper::errorResponse("you haven't authorization to delete this file", [], 403);
+    }
+
+    public function search(SearchFileRequest $request)
+    {
+        $data = $this->fileService->search($request->validated());
+        
+        return JsonResponseHelper::successResponse('retreive all files', FileResource::collection($data), 200);
     }
 }

@@ -43,7 +43,7 @@ class UpdateFileRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         $errors = collect($validator->errors()->toArray())
-            ->map(fn($error) => $error[0]) // Get only the first error for each field
+            ->map(fn($error) => $error[0])
             ->toArray();
 
         throw new HttpResponseException(

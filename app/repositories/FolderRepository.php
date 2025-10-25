@@ -73,7 +73,6 @@ class FolderRepository
     {
         $parents_List = $folder->parents_list . $folder->id . '/';
 
-        // Log::info($parents_List);
         return DB::table('folders')
             ->where('parents_list', 'like', $parents_List . '%')
             ->pluck('id')

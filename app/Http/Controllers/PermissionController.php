@@ -24,6 +24,7 @@ class PermissionController extends Controller
 
     public function create(CreatePermissionRequest $request, Folder $folder)
     {
+        // return "hello world"    ;
         $validated = $request->validated();
         $validated['folder_id'] = $folder->id;
 

@@ -14,7 +14,6 @@ class FolderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $sizes = 0;
         return [
             'id' => $this->id,
             'name' => $this->name,

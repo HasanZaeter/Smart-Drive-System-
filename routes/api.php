@@ -27,6 +27,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('folders')->group(function () {
     Route::controller(FolderController::class)->middleware(JwtMiddleware::class)->group(function () {
         Route::get('root', 'foldersInRoot');
+        Route::post('search','search');
         Route::get('/{folder}', 'show')->missing(function () {
             return JsonResponseHelper::errorResponse('Folder Not Found', [], 404);
         });
@@ -46,6 +47,7 @@ Route::prefix('folders')->group(function () {
 Route::prefix('files')->group(function () {
     Route::controller(FileController::class)->middleware(JwtMiddleware::class)->group(function () {
         Route::post('', 'create');
+        Route::post('search','search');
         Route::get('/{file}', 'show')->missing(function () {
             return JsonResponseHelper::errorResponse('File Not Found', [], 404);
         });
